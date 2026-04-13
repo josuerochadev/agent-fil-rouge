@@ -20,6 +20,10 @@ env/
 data/
 chromadb_data/
 
+# Large files (course materials)
+*.pptx
+*.pdf
+
 # PDF corpus (too large for git)
 exercices/**/cnil/
 
