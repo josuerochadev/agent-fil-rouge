@@ -69,7 +69,8 @@ PERTINENCE_MIN = 5
 MAX_ARTICLES_PAR_RAPPORT = 20
 
 # --- Stockage local ---
-DATA_DIR = "data"
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(_BASE_DIR, "data")
 ARTICLES_FILE = f"{DATA_DIR}/articles.json"
 HISTORIQUE_FILE = f"{DATA_DIR}/historique_envois.json"
 ARCHIVES_FILE = f"{DATA_DIR}/archives.json"

@@ -26,6 +26,8 @@ agent-fil-rouge/
 │   └── rag.py           # Embeddings + recherche sémantique
 ├── memory/
 │   └── store.py         # Mémoire de session conversationnelle
+├── tests/               # Tests unitaires et d'intégration
+├── docs/                # Documentation et résultats d'exercices
 └── data/                # Données générées (gitignored)
 ```
 
@@ -33,7 +35,7 @@ agent-fil-rouge/
 
 ```bash
 # Cloner le repo
-git clone https://github.com/<votre-username>/agent-fil-rouge.git
+git clone https://github.com/josuerochadev/agent-fil-rouge.git
 cd agent-fil-rouge
 
 # Créer un environnement virtuel
@@ -71,7 +73,7 @@ python seed.py
 ### Tests
 
 ```bash
-python -m pytest test_*.py -v
+python -m pytest tests/ -v
 ```
 
 ## Configuration

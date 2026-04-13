@@ -17,67 +17,66 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 
-# ---------------------------------------------------------------------------
-# Étape 1 — Collecte RSS
-# ---------------------------------------------------------------------------
-print("\n[1/4] Collecte RSS...")
-articles = recuperer_articles_rss()
-print(f"      {len(articles)} articles récupérés.")
 
-# ---------------------------------------------------------------------------
-# Étape 2 — Filtrage thématique
-# ---------------------------------------------------------------------------
-print("[2/4] Filtrage thématique...")
-filtres = filtrer_par_theme(articles)
-print(f"      {len(filtres)} articles retenus.")
+def run():
+    """Exécute le pipeline complet de veille technologique."""
 
-# ---------------------------------------------------------------------------
-# Étape 3 — Enrichissement LLM (résumé + catégorie + pertinence)
-# ---------------------------------------------------------------------------
-print(f"[3/4] Enrichissement LLM (seuil pertinence >= {PERTINENCE_MIN})...")
+    # --- Étape 1 — Collecte RSS ---
+    print("\n[1/4] Collecte RSS...")
+    articles = recuperer_articles_rss()
+    print(f"      {len(articles)} articles récupérés.")
 
-nouveaux = [a for a in filtres if not article_deja_traite(a["lien"])]
-print(f"      {len(nouveaux)} nouveaux articles à enrichir (doublons exclus).")
+    # --- Étape 2 — Filtrage thématique ---
+    print("[2/4] Filtrage thématique...")
+    filtres = filtrer_par_theme(articles)
+    print(f"      {len(filtres)} articles retenus.")
 
-enrichis = []
-for i, article in enumerate(nouveaux, 1):
-    titre = article.get("titre", "")
-    contenu = article.get("resume_brut", "")
-    try:
-        analyse = resumer_article(titre, contenu)
-        pertinence = int(analyse.get("pertinence", 0))
+    # --- Étape 3 — Enrichissement LLM (résumé + catégorie + pertinence) ---
+    print(f"[3/4] Enrichissement LLM (seuil pertinence >= {PERTINENCE_MIN})...")
 
-        if pertinence < PERTINENCE_MIN:
-            print(f"      [{i}/{len(nouveaux)}] Ignoré (pertinence {pertinence}) : {titre[:50]}")
-            continue
+    nouveaux = [a for a in filtres if not article_deja_traite(a["lien"])]
+    print(f"      {len(nouveaux)} nouveaux articles à enrichir (doublons exclus).")
 
-        article.update({
-            "resume":     analyse.get("resume", contenu[:300]),
-            "categorie":  analyse.get("categorie", "Autre"),
-            "pertinence": pertinence,
-            "action":     analyse.get("action", "lire"),
-        })
-        enrichis.append(article)
-        print(f"      [{i}/{len(nouveaux)}] ✓ [{pertinence}/10] {analyse.get('categorie','?')} — {titre[:50]}")
+    enrichis = []
+    for i, article in enumerate(nouveaux, 1):
+        titre = article.get("titre", "")
+        contenu = article.get("resume_brut", "")
+        try:
+            analyse = resumer_article(titre, contenu)
+            pertinence = int(analyse.get("pertinence", 0))
 
-    except Exception as e:
-        logging.warning(f"Enrichissement échoué pour '{titre}' : {e}")
-        # On garde l'article avec ses données brutes plutôt que de le perdre
-        article.setdefault("categorie", "Autre")
-        article.setdefault("pertinence", 5)
-        enrichis.append(article)
+            if pertinence < PERTINENCE_MIN:
+                print(f"      [{i}/{len(nouveaux)}] Ignoré (pertinence {pertinence}) : {titre[:50]}")
+                continue
 
-    # Petite pause pour éviter le rate limit sur de gros volumes
-    if i % 10 == 0:
-        time.sleep(1)
+            article.update({
+                "resume":     analyse.get("resume", contenu[:300]),
+                "categorie":  analyse.get("categorie", "Autre"),
+                "pertinence": pertinence,
+                "action":     analyse.get("action", "lire"),
+            })
+            enrichis.append(article)
+            print(f"      [{i}/{len(nouveaux)}] ✓ [{pertinence}/10] {analyse.get('categorie','?')} — {titre[:50]}")
 
-print(f"      {len(enrichis)} articles enrichis et pertinents.")
+        except Exception as e:
+            logging.warning(f"Enrichissement échoué pour '{titre}' : {e}")
+            article.setdefault("categorie", "Autre")
+            article.setdefault("pertinence", 5)
+            enrichis.append(article)
 
-# ---------------------------------------------------------------------------
-# Étape 4 — Sauvegarde + indexation RAG
-# ---------------------------------------------------------------------------
-print("[4/4] Sauvegarde et indexation RAG...")
-nb = sauvegarder_articles(enrichis)
-print(f"      {nb} articles sauvegardés et indexés.")
+        if i % 10 == 0:
+            time.sleep(1)
 
-print(f"\n✓ Pipeline terminé — {nb} nouveaux articles dans la base.\n")
+    print(f"      {len(enrichis)} articles enrichis et pertinents.")
+
+    # --- Étape 4 — Sauvegarde + indexation RAG ---
+    print("[4/4] Sauvegarde et indexation RAG...")
+    nb = sauvegarder_articles(enrichis)
+    print(f"      {nb} articles sauvegardés et indexés.")
+
+    print(f"\n✓ Pipeline terminé — {nb} nouveaux articles dans la base.\n")
+    return nb
+
+
+if __name__ == "__main__":
+    run()

@@ -14,9 +14,9 @@ import os
 from datetime import datetime, timezone
 
 import numpy as np
-from openai import OpenAI
 
-from config import OPENAI_API_KEY, DATA_DIR
+from config import DATA_DIR
+from llm import get_openai_client
 
 logger = logging.getLogger(__name__)
 
@@ -26,18 +26,6 @@ BATCH_SIZE      = 512          # Max inputs par appel OpenAI (limite : 2048)
 FRESHNESS_DECAY = 90           # Jours après lesquels un article est considéré "vieux"
 ALPHA_SIMILARITE = 0.75        # Poids similarité cosine dans le score hybride
 ALPHA_FRAICHEUR  = 0.25        # Poids fraîcheur dans le score hybride
-
-# ---------------------------------------------------------------------------
-# Client OpenAI (lazy)
-# ---------------------------------------------------------------------------
-_client = None
-
-def _get_client() -> OpenAI:
-    global _client
-    if _client is None:
-        _client = OpenAI(api_key=OPENAI_API_KEY)
-    return _client
-
 
 # ---------------------------------------------------------------------------
 # Persistance
@@ -73,7 +61,7 @@ def _embedder_batch(textes: list[str]) -> list[list[float]]:
     tous = []
     for i in range(0, len(textes), BATCH_SIZE):
         chunk = textes[i:i + BATCH_SIZE]
-        response = _get_client().embeddings.create(
+        response = get_openai_client().embeddings.create(
             input=chunk,
             model=EMBEDDING_MODEL,
         )

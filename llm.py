@@ -9,8 +9,10 @@ logger = logging.getLogger(__name__)
 
 _client = None
 
-def _get_client() -> openai.OpenAI:
-    """Initialise le client OpenAI au premier appel (lazy init)."""
+
+def get_openai_client() -> openai.OpenAI:
+    """Initialise le client OpenAI au premier appel (lazy init).
+    Point d'accès unique — utilisé aussi par tools/rag.py."""
     global _client
     if _client is None:
         if not OPENAI_API_KEY:
@@ -114,7 +116,7 @@ def appeler_llm(question: str, system_prompt: str = SYSTEM_PROMPT, retries: int 
     """
     for tentative in range(1, retries + 1):
         try:
-            response = _get_client().chat.completions.create(
+            response = get_openai_client().chat.completions.create(
                 model=MODEL_DEFAULT,
                 temperature=TEMPERATURE,
                 max_tokens=MAX_TOKENS,
