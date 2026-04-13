@@ -1,6 +1,6 @@
-# Formation IA — Projets et Exercices
+# Formation IA — Concevoir, développer et déployer un agent IA
 
-Dépôt regroupant les travaux réalisés dans le cadre d'une formation en Intelligence Artificielle.
+Dépôt regroupant les travaux réalisés dans le cadre de la formation "Concevoir, développer et déployer un agent IA sur mesure pour votre entreprise" (AJC Formation — 10 jours / 70h).
 
 ## Structure
 
@@ -10,19 +10,20 @@ Dépôt regroupant les travaux réalisés dans le cadre d'une formation en Intel
 └── fiches/          # Fiches de synthèse et notes de cours
 ```
 
-## Contenu
+## Modules
 
-### [Fil Rouge](fil-rouge/) — Agent de Veille Technologique
+| Module | Thème | Exercices |
+|---|---|---|
+| Module 1 | Fondamentaux IA & LLM | 5 exercices (tokens, hallucinations, comparaison LLM, paramètres, stratégies) |
+| Module 2 | Conception d'agents | 4 exercices (matrice de priorisation, patterns, outils, cahier des charges) |
+| Module 3 | Implémentation | 5 exercices (structure projet, JSON, ReAct, mémoire, debugging) |
+| Module 4 | RAG | 1 exercice (pipeline RAG de bout en bout) |
 
-Agent IA automatisé qui collecte des articles RSS, les enrichit via LLM et propose un agent conversationnel avec raisonnement ReAct et recherche sémantique (RAG).
+## Projet fil rouge
 
-### [Exercices](exercices/)
+**Agent de veille technologique** : agent IA automatisé qui collecte des articles RSS, les enrichit via LLM (résumé, catégorisation, pertinence), et propose un agent conversationnel avec raisonnement ReAct et recherche sémantique (RAG).
 
-Exercices pratiques organisés par module de formation.
-
-### [Fiches](fiches/)
-
-Fiches de synthèse et notes de cours.
+Voir [fil-rouge/README.md](fil-rouge/README.md) pour les détails.
 
 ## Équipe
 
