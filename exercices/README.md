@@ -37,4 +37,4 @@ Exercices pratiques réalisés pendant la formation, organisés par module.
 |---|---|---|
 | 1 | Construire un pipeline RAG de bout en bout | [exercice1-pipeline-rag.md](module4/exercice1-pipeline-rag.md) |
 
-Code source : [`fil-rouge/tools/rag/`](../fil-rouge/tools/rag/) (ingest.py, chunk.py, vectorstore.py, query.py)
+Code source : [`exercices/module4/rag/`](module4/rag/) (ingest.py, chunk.py, vectorstore.py, query.py)

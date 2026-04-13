@@ -7,7 +7,7 @@
 
 ## Étape 1 — Ingestion et nettoyage
 
-Fichier : [`fil-rouge/tools/rag/ingest.py`](../../fil-rouge/tools/rag/ingest.py)
+Fichier : [`rag/ingest.py`](rag/ingest.py)
 
 - Extraction du texte de chaque page PDF avec `pdfplumber`
 - Nettoyage des espaces multiples et sauts de ligne superflus
@@ -17,7 +17,7 @@ Fichier : [`fil-rouge/tools/rag/ingest.py`](../../fil-rouge/tools/rag/ingest.py)
 
 ## Étape 2 — Chunking
 
-Fichier : [`fil-rouge/tools/rag/chunk.py`](../../fil-rouge/tools/rag/chunk.py)
+Fichier : [`rag/chunk.py`](rag/chunk.py)
 
 - Découpage en morceaux de ~500 mots avec chevauchement de 50 mots
 - Chaque chunk conserve les métadonnées de sa page source
@@ -26,7 +26,7 @@ Fichier : [`fil-rouge/tools/rag/chunk.py`](../../fil-rouge/tools/rag/chunk.py)
 
 ## Étape 3 — Embeddings + Stockage
 
-Fichier : [`fil-rouge/tools/rag/vectorstore.py`](../../fil-rouge/tools/rag/vectorstore.py)
+Fichier : [`rag/vectorstore.py`](rag/vectorstore.py)
 
 - Embeddings générés avec `text-embedding-3-small` (OpenAI) en batch de 100
 - Stockage dans ChromaDB (persistant sur disque) avec métadonnées (source, page)
@@ -36,7 +36,7 @@ Fichier : [`fil-rouge/tools/rag/vectorstore.py`](../../fil-rouge/tools/rag/vecto
 
 ## Étape 4 — Interrogation
 
-Fichier : [`fil-rouge/tools/rag/query.py`](../../fil-rouge/tools/rag/query.py)
+Fichier : [`rag/query.py`](rag/query.py)
 
 - Recherche des 3 chunks les plus pertinents par similarité cosinus
 - Injection du contexte dans le prompt avec l'instruction "réponds uniquement à partir du contexte fourni"
@@ -54,6 +54,6 @@ Les scores de similarité confirment la pertinence : **0.72-0.76** pour les ques
 
 ## Livrable
 
-- Pipeline RAG fonctionnel : 4 fichiers Python dans [`fil-rouge/tools/rag/`](../../fil-rouge/tools/rag/)
+- Pipeline RAG fonctionnel : 4 fichiers Python dans [`rag/`](rag/)
 - Corpus indexé : 39 PDFs CNIL, 2367 chunks
 - 3 tests documentés ci-dessus
