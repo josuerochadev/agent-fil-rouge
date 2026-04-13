@@ -35,12 +35,6 @@ Exercices pratiques réalisés pendant la formation, organisés par module.
 
 | # | Exercice | Fichier |
 |---|---|---|
-| 1 | Construire un pipeline RAG de bout en bout | [rag/](module4/rag/) (ingest.py, chunk.py, vectorstore.py, query.py) |
+| 1 | Construire un pipeline RAG de bout en bout | [exercice1-pipeline-rag.md](module4/exercice1-pipeline-rag.md) |
 
-### Résultats des tests RAG (corpus CNIL — 39 PDFs, 2367 chunks)
-
-| Question | Pertinente ? | Source citée ? | Hors corpus géré ? |
-|---|---|---|---|
-| Droits des personnes selon le RGPD | Oui | Oui | — |
-| Recommandations sécurité CNIL | Oui | Oui | — |
-| Cours de l'action Apple | — | — | Oui |
+Code source : [`fil-rouge/tools/rag/`](../fil-rouge/tools/rag/) (ingest.py, chunk.py, vectorstore.py, query.py)
