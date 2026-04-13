@@ -18,6 +18,10 @@ env/
 
 # Data (generated at runtime)
 data/
+chromadb_data/
+
+# PDF corpus (too large for git)
+exercices/**/cnil/
 
 # IDE
 .vscode/
