@@ -70,6 +70,7 @@ cd fil-rouge && python -m pytest tests/test_security.py -v
 ```
 
 27 tests couvrant :
+
 - 3 tests injection directe (FR/EN)
 - 3 tests exfiltration prompt
 - 1 test injection contexte
