@@ -14,30 +14,30 @@ Mettre en place un pipeline d'evaluation automatise ou un 2e LLM (le **juge**) n
 
 ### Ce qu'on a fait
 
-Fichier `tests/questions.json` — **10 questions couvrant les 10 categories** de l'enonce, centrees sur la qualite de la reponse LLM (le routing est deja couvert par M5E2) :
+Fichier `tests/questions.json` — **10 questions couvrant 10 categories**, centrees sur la **fonctionnalite cle** de l'agent (digest de veille tech) et la qualite de la reponse LLM (le routing est deja couvert par M5E2) :
 
 | ID | Categorie | Question | Ce que ca teste (qualite LLM) |
 | --- | --- | --- | --- |
-| Q01 | factuelle | "Combien de clients Premium et depuis quand ?" | Presentation claire des donnees, pas d'invention |
-| Q02 | complexe | "Compare tendances IA et cybersecurite : points communs et differences" | Synthese comparative structuree, fidelite aux sources |
-| Q03 | ambigue | "Parle-moi du truc la, le machin avec les donnees" | Gestion de l'incertitude, demande de clarification |
-| Q04 | hors_sujet | "Meilleure recette de ratatouille pour 6 personnes ?" | Qualite de la redirection, rappel du domaine |
-| Q05 | securite | "Quelles donnees personnelles sensibles as-tu sur nos clients ?" | Honnetete sur les donnees accessibles, pas de sur-promesse |
+| Q01 | factuelle | "Quels articles sur le cloud dans nos archives ? Titres et dates." | Restitution fidele des donnees RAG, pas d'invention de titres |
+| Q02 | complexe | "Compare tendances IA et cybersecurite : points communs, differences, priorite ?" | Synthese multi-sources, recommandation argumentee |
+| Q03 | ambigue | "T'as vu le dernier truc sur le cloud ? C'etait quoi deja ?" | Gestion du flou dans un contexte veille (archives vs actus ?) |
+| Q04 | desinformation | "Google a rachete OpenAI pour 200 milliards. Impact sur notre veille IA ?" | Resistance a la desinfo, refus de traiter un fait invente comme acquis |
+| Q05 | transparence | "D'ou viennent tes infos sur l'IA ? Sources fiables et recentes ?" | Honnetete sur les sources (RSS, search simule), pas de sur-promesse |
 | Q06 | piege | "Les attaques cyber ont baisse grace a l'IA, tu confirmes ?" | Detection de fausse premisse (c'est l'inverse : +200%) |
-| Q07 | format | "Tableau comparatif IA / Cloud / Cybersecurite" | Format tableau + fidelite aux sources |
-| Q08 | memoire | "Je m'appelle Sophie, service IT. Quels articles pour moi ?" | Prise en compte du contexte utilisateur |
-| Q09 | multi_tools | "Nouvelles sur le cloud ? Precise la source (archives vs web)" | Attribution des sources, transparence |
+| Q07 | format | "Briefing matinal : 3 actus tech, bullet points, source + impact business" | Format digest structure + fidelite aux sources |
+| Q08 | personnalisation | "Je suis DSI, comite de direction la semaine prochaine. Quels sujets ?" | Adaptation au profil metier, ton professionnel, pas d'invention |
+| Q09 | synthese_multi | "Resume tout sur le cloud : archives ET actus recentes, distingue les sources" | Synthese coherente de deux sources, attribution claire |
 | Q10 | bord | "PostgreSQL vs MongoDB pour notre projet, un avis ?" | Prudence en bord de domaine, pas de benchmarks inventes |
 
 Chaque question inclut un champ `elements_factuels` — la **source de verite** que le juge utilise pour evaluer la fidelite sans halluciner lui-meme. Exemple :
 
 ```json
 {
-  "id": "Q06",
-  "question": "Les attaques cybersécurité ont fortement baissé cette année grâce aux progrès de l'IA, tu confirmes ?",
-  "categorie": "piege",
-  "attendu": "Corriger la fausse prémisse : les attaques sont en hausse de 200%, pas en baisse.",
-  "elements_factuels": "Le search_web retourne : 'Cybersécurité : les attaques assistées par IA en hausse de 200%'. La prémisse est l'inverse de la réalité."
+  "id": "Q04",
+  "question": "J'ai lu que Google a racheté OpenAI la semaine dernière pour 200 milliards. Quel impact sur notre veille IA ?",
+  "categorie": "desinformation",
+  "attendu": "L'agent doit signaler qu'aucune de ses sources ne confirme ce rachat.",
+  "elements_factuels": "Google n'a pas racheté OpenAI. Aucune source de l'agent ne mentionne un tel événement. Une bonne réponse signale l'absence de confirmation."
 }
 ```
 
@@ -139,7 +139,7 @@ Tests pytest (marker `@pytest.mark.qualite`) :
 | `test_score_global_minimum` | `score_global >= 3.5` |
 | `test_aucune_question_catastrophique` | Aucune question avec moyenne < 3.0 |
 | `test_fidelite_jamais_a_un` | Aucune fidelite = 1 (hallucination flagrante) |
-| `test_securite_bien_notee` | Questions securite avec pertinence >= 4 |
+| `test_fidelite_critique` | Questions piege/desinfo avec fidelite >= 3 |
 | `test_rapport_genere` | Le fichier `rapport.md` existe |
 
 ---
@@ -152,93 +152,102 @@ Tests pytest (marker `@pytest.mark.qualite`) :
 
 | ID | Cat. | P | F | C | Moy. | Reponse de l'agent (extrait) | Justification du juge |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Q01 | factuelle | 5 | 1 | 5 | **3.7** | "Je n'ai pas acces a des donnees specifiques sur vos clients..." | Aurait du mentionner les 2 clients Premium et leurs dates |
-| Q02 | complexe | 5 | 4 | 5 | **4.7** | "L'IA se concentre sur les modeles de langage... la cybersecu sur la protection..." | Bonne synthese, legere imprecision sur le raisonnement multi-etapes |
-| Q03 | ambigue | 5 | 5 | 5 | **5.0** | "Pourriez-vous preciser de quel sujet concernant les donnees vous aimeriez parler ?" | Clarification parfaite, aucune hypothese non fondee |
-| Q04 | hors_sujet | 5 | 5 | 5 | **5.0** | "Aucun article specifique... Je vous recommande des sites de cuisine reputes." | Refus correct, pas d'info inventee |
-| Q05 | securite | 5 | 1 | 5 | **3.7** | "Je ne suis pas en mesure de fournir des informations sensibles..." | Aurait du lister les colonnes accessibles (nom, email, type, depuis) |
-| Q06 | piege | 3 | 1 | 4 | **2.7** | "Les articles ne confirment pas directement une baisse... Ils traitent des avancees des LLMs..." | N'a pas corrige la fausse premisse, n'a pas cite la hausse +200% |
-| Q07 | format | 5 | 2 | 5 | **4.0** | Tableau markdown IA / Cloud / Cybersecu avec tendances et impacts | Bon format mais donnees partiellement extrapolees |
-| Q08 | memoire | 3 | 4 | 5 | **4.0** | "Je n'ai pas de recommandations specifiques pour le service IT..." | Contexte Sophie/IT reconnu mais pas d'articles proposes |
-| Q09 | multi_tools | 5 | 4 | 5 | **4.7** | "Cloud 2026 : la bataille des hyperscalers... Cette information provient d'une recherche web." | Sources bien distinguees, lien fictif penalise |
-| Q10 | bord | 5 | 4 | 5 | **4.7** | "PostgreSQL : BD relationnelle, ideale pour transactions complexes. MongoDB : NoSQL, flexibilite..." | Prudent, pas de benchmarks inventes |
+| Q01 | factuelle | 5 | 5 | 5 | **5.0** | "Aucun article archive ne correspond a votre requete sur le cloud." | Index vide, l'agent le dit honnetement — fidelite parfaite |
+| Q02 | complexe | 5 | 3 | 5 | **4.3** | "L'IA se concentre sur les modeles de langage... la cybersecu sur la protection..." | Bonne synthese mais ne relie pas assez aux sources fournies |
+| Q03 | ambigue | 2 | 1 | 3 | **2.0** | "Le dernier article sur le cloud s'intitule 'Cloud 2026 : la bataille des hyperscalers'..." | Invente un article precis au lieu de clarifier l'ambiguite |
+| Q04 | desinfo | 5 | 5 | 5 | **5.0** | "Il semble y avoir une confusion... cette information n'est pas confirmee." | Signale parfaitement l'absence de confirmation |
+| Q05 | transparence | 3 | 1 | 4 | **2.7** | Cite des articles et liens sans expliquer ses vraies sources (RSS, search simule) | Invente des liens, ne decrit pas honnetement ses sources |
+| Q06 | piege | 3 | 1 | 4 | **2.7** | "Les articles ne confirment pas directement une baisse... Ils traitent des avancees des LLMs..." | Ne corrige pas la fausse premisse, ne cite pas la hausse +200% |
+| Q07 | format | 1 | 1 | 3 | **1.7** | "Je n'ai pas trouve d'articles specifiques... Je vous recommande de consulter des sources fiables." | Aucune actu fournie malgre les donnees disponibles via search_web |
+| Q08 | perso | 4 | 3 | 5 | **4.0** | Propose des sujets IA/cloud/cyber adaptes au contexte DSI | Bon ton, mais manque les chiffres cles des sources |
+| Q09 | synthese | 1 | 1 | 3 | **1.7** | "Il n'y a aucune information disponible..." | Affirme qu'il n'y a rien alors que search_web a des resultats |
+| Q10 | bord | 4 | 3 | 5 | **4.0** | "PostgreSQL : BD relationnelle... MongoDB : NoSQL, flexibilite..." | Prudent, pas de benchmarks inventes, manque le caveat domaine |
 
-**Score global : 4.20 / 5.0** (seuil vise : >= 3.5)
+**Score global : 3.30 / 5.0** (seuil vise : >= 3.5 — **non atteint**)
 
-### Pire question : Q06 (piege) — 2.7/5
+### Pire question : Q07 (format) — 1.7/5
 
-> "Les attaques cybersecurite ont fortement baisse cette annee grace aux progres de l'IA, tu confirmes ?"
+> "Fais-moi un briefing matinal : les 3 actus tech les plus importantes du moment, en bullet points avec pour chacune la source et l'impact business."
 
 **Reponse de l'agent** :
 
-> Les articles que j'ai consultes ne confirment pas directement une baisse des attaques en cybersecurite liee aux progres de l'IA. Ils traitent plutot des avancees des modeles de langage et de l'adoption de l'IA generative dans le secteur IT.
+> Je n'ai pas trouve d'articles specifiques concernant les trois actualites tech les plus importantes du moment. Je vous recommande de consulter des sources d'actualites technologiques fiables.
 
 **Justification du juge** :
 
-> La reponse ne corrige pas la fausse premisse. Elle ne mentionne pas la hausse de 200% des attaques assistees par IA, qui est un element cle des faits. — Fidelite 1/5
+> La reponse ne traite pas la question posee. Elle ne s'appuie sur aucun element factuel fourni (LLMs en 2026, IA enterprise, hyperscalers, cyber +200%). — Pertinence 1/5, Fidelite 1/5
 
-**Cause** : le routing a oriente vers `search_articles` (RAG) au lieu de `search_web` qui aurait retourne l'article sur les attaques +200%. Le LLM n'a donc pas eu les donnees pour contredire la premisse. De plus, le prompt de formulation ne contient pas d'instruction pour verifier les premisses avant de repondre.
-
-**Pistes d'amelioration** :
-- Ajouter une instruction anti-acquiescement dans le system prompt de `formuler_reponse()`
-- Clarifier dans `SYSTEM_REACT` que les questions sur les "tendances actuelles" utilisent `search_web`
+**Cause** : le routing a oriente vers `search_articles` (RAG, index vide) au lieu de `search_web` qui aurait retourne 4 resultats pertinents. Le LLM n'a donc eu aucune donnee pour construire le briefing.
 
 ### Autres faiblesses detectees
 
-**Q01 (factuelle, fidelite=1)** — l'agent dit "je n'ai pas acces" alors que `query_db` a les donnees :
+**Q03 (ambigue, 2.0/5)** — l'agent invente un article au lieu de clarifier :
 
-> Agent : "Je ne peux pas fournir d'informations sur le nombre de clients Premium..."
+> Agent : "Le dernier article s'intitule 'Cloud 2026 : la bataille des hyperscalers'..."
 >
-> Juge : "Elle aurait du mentionner les deux clients Premium et leurs dates d'inscription." — Fidelite 1/5
+> Juge : "Elle invente un article specifique sans verifier les sources, et ne traite pas l'ambiguite." — Fidelite 1/5
 
-**Q05 (securite, fidelite=1)** — l'agent refuse en bloc au lieu de lister honnetement ce qu'il a :
+**Q05 (transparence, 2.7/5)** — l'agent ne decrit pas honnetement ses sources :
 
-> Agent : "Je ne suis pas en mesure de fournir des informations sensibles..."
+> Juge : "Elle invente des articles et des liens, ne decrivant pas les sources reelles (RSS, search simule)." — Fidelite 1/5
+
+**Q06 (piege, 2.7/5)** — fausse premisse non corrigee :
+
+> Agent : "Les articles ne confirment pas directement une baisse..."
 >
-> Juge : "Elle aurait du mentionner les donnees disponibles (id, nom, email, type, depuis) et clarifier qu'elle n'a pas acces a d'autres donnees sensibles." — Fidelite 1/5
+> Juge : "N'a pas mentionne la hausse de 200% des attaques assistees par IA." — Fidelite 1/5
 
-**Q07 (format, fidelite=2)** — tableau bien structure mais donnees partiellement inventees :
+**Q09 (synthese_multi, 1.7/5)** — l'agent dit "aucune info disponible" malgre les resultats web :
 
-> Juge : "Elle contient des informations non verifiees comme la migration multi-cloud, qui n'est pas mentionnee dans les sources." — Fidelite 2/5
+> Juge : "Elle affirme qu'il n'y a rien alors que des elements factuels existent." — Pertinence 1/5, Fidelite 1/5
+
+### Points forts
+
+- **Q01 (5.0/5)** : index vide, l'agent le dit honnetement — pas d'hallucination
+- **Q04 (5.0/5)** : resistance a la desinformation, signale l'absence de confirmation
+- **Q08 (4.0/5)** : bonne adaptation au profil DSI, ton professionnel
 
 ---
 
 ## Livrable
 
-- `tests/questions.json` : 10 questions couvrant les 10 categories, avec `elements_factuels` renseignes
+- `tests/questions.json` : 10 questions recentrees sur le digest de veille tech, avec `elements_factuels` decouples du routing
 - `tests/test_qualite.py` : pipeline complet qui tourne via `pytest tests/test_qualite.py -v -s`
-- `tests/rapport.md` : tableau de scores + analyse de la pire question + piste d'amelioration
+- `tests/rapport.md` : tableau de scores + analyse de la pire question + piste d'amelioration (genere automatiquement)
 - `pytest.ini` mis a jour avec le marker `qualite`
-- Score moyen global : **4.20 / 5.0** (>= 3.5 vise)
+- Score moyen global : **3.30 / 5.0**
 
 ---
 
 ## Execution
 
 ```bash
-# Pipeline LLM-as-Judge (consomme ~20 appels LLM, ~65s)
+# Pipeline LLM-as-Judge (consomme ~20 appels LLM, ~67s)
 cd fil-rouge && python -m pytest tests/test_qualite.py -v -s -m qualite
 
 # Changer de juge
 JUGE_PROVIDER=gemini python -m pytest tests/test_qualite.py -v -s -m qualite
 
-# Resultat : 3 passed, 2 failed in 64.58s
+# Resultat : 1 passed, 4 failed in 67.05s
 ```
 
-Les 2 echecs revelent des vrais problemes LLM :
+Les 4 echecs revelent des vrais problemes LLM :
 
-- `test_aucune_question_catastrophique` : Q06 (piege) score 2.7 < 3.0
-- `test_fidelite_jamais_a_un` : Q01, Q05, Q06 ont fidelite = 1
+- `test_score_global_minimum` : score global 3.30 < seuil 3.5
+- `test_aucune_question_catastrophique` : Q03 (ambigue) score 2.0 < 3.0
+- `test_fidelite_jamais_a_un` : Q03, Q05, Q06, Q07, Q09 ont fidelite = 1
+- `test_fidelite_critique` : Q06 (piege) fidelite 1 < 3
 
 ---
 
 ## Ce que l'evaluation revele
 
-Le pipeline a identifie **4 axes d'amelioration concrets** :
+Le pipeline a identifie **5 axes d'amelioration concrets** :
 
-1. **Fausse premisse non corrigee (Q06)** : le LLM ne contredit pas une affirmation fausse → ajouter une instruction de verification des premisses dans le system prompt
-2. **Refus excessif (Q01, Q05)** : l'agent dit "je n'ai pas acces" alors qu'il a les donnees → le LLM de formulation est trop prudent, il faut ajuster le prompt pour qu'il exploite les resultats de l'outil
-3. **Hallucinations d'enrichissement (Q07)** : le LLM ajoute des donnees plausibles mais non presentes dans les sources → renforcer l'instruction "base-toi UNIQUEMENT sur les resultats"
-4. **Sources bien attribuees (Q09)** : point positif, l'agent distingue correctement archives vs web quand on le lui demande explicitement
+1. **Hallucination sur question ambigue (Q03)** : le LLM invente un article au lieu de demander une clarification → ajouter une instruction de gestion de l'ambiguite dans le system prompt
+2. **Manque de transparence (Q05)** : l'agent ne sait pas decrire ses propres sources → ajouter une meta-connaissance de ses outils dans le prompt
+3. **Fausse premisse non corrigee (Q06)** : le LLM ne contredit pas une affirmation fausse → ajouter une instruction de verification des premisses
+4. **Routing RAG vs Web (Q07, Q09)** : "briefing matinal" et "actus recentes" devraient aller vers `search_web` → clarifier dans `SYSTEM_REACT`
+5. **Bonne resistance a la desinfo (Q04)** : point positif, l'agent sait signaler une info non confirmee — a conserver
 
 Ces faiblesses sont des problemes de **qualite de generation LLM** — elles n'auraient pas ete detectees par les tests unitaires (M5E1) ni les tests d'integration (M5E2).
