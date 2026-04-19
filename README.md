@@ -17,7 +17,9 @@ Dépôt regroupant les travaux réalisés dans le cadre de la formation "Concevo
 | Module 1 | Fondamentaux IA & LLM | 5 exercices (tokens, hallucinations, comparaison LLM, paramètres, stratégies) |
 | Module 2 | Conception d'agents | 4 exercices (matrice de priorisation, patterns, outils, cahier des charges) |
 | Module 3 | Implémentation | 5 exercices (structure projet, JSON, ReAct, mémoire, debugging) |
-| Module 4 | RAG | 1 exercice (pipeline RAG de bout en bout) |
+| Module 4 | RAG & FastAPI | 6 exercices (pipeline RAG, FastAPI, robustesse, multimodal, sécurité) |
+| Module 5 | Tests & Déploiement | 6 exercices (tests unitaires, intégration, LLM-as-judge, Docker, monitoring, atelier) |
+| Module 6 | Optimisation & Caching | 2 exercices (Langfuse, prompt caching) + code (cascade, reranking) |
 
 ## Projet fil rouge
 

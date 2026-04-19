@@ -9,6 +9,7 @@ Fiches de synthese et notes de cours de la formation *Concevoir, developper et d
 | 3 | [Developpement Python & Prototypage](module3-developpement-python-prototypage-agent-ia.md) | Structure projet, appels API LLM, ReAct, tools, memoire, RAG, integrations, debug |
 | 4 | [RAG & Integration SI](module4-rag-integration-systeme-information.md) | Pipeline RAG complet, bases vectorielles, FastAPI, webhooks, connecteurs metier, multimodalite, securite |
 | 5 | [Tests, Deploiement & Mise en production](module5-tests-deploiement-mise-en-production.md) | Tests a 3 niveaux, Docker, cloud (GCP/AWS), monitoring, KPIs metier, conduite du changement, soutenance |
+| 6 | [Optimisation & Caching](module6-optimisation-caching.md) | Langfuse, prompt caching, cascade routing, reranking, benchmarks |
 
 ## Liens vers le code
 

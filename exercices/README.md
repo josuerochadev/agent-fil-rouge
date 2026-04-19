@@ -37,5 +37,31 @@ Exercices pratiques réalisés pendant la formation, organisés par module.
 |---|---|---|
 | 1 | Construire un pipeline RAG de bout en bout | [exercice1-pipeline-rag.md](module4/exercice1-pipeline-rag.md) |
 | 2 | Exposer votre agent via FastAPI | [exercice2-fastapi.md](module4/exercice2-fastapi.md) |
+| 3 | Robustesse du RAG | [exercice3-robustesse.md](module4/exercice3-robustesse.md) |
+| 4 | RAG multimodal | [exercice4-multimodal.md](module4/exercice4-multimodal.md) |
+| 5 | Sécurité du RAG | [exercice5-securite.md](module4/exercice5-securite.md) |
+| 5b | Sécurité RAG — corpus CNIL | [exercice5-securite-rag-cnil.md](module4/exercice5-securite-rag-cnil.md) |
 
 Code source : [`exercices/module4/rag/`](module4/rag/) (ingest.py, chunk.py, vectorstore.py, query.py, api.py)
+
+## Module 5 — Tests & Déploiement
+
+| # | Exercice | Fichier |
+|---|---|---|
+| 1 | Tests unitaires | [exercice1-tests-unitaires.md](module5/exercice1-tests-unitaires.md) |
+| 2 | Tests d'intégration | [exercice2-tests-integration.md](module5/exercice2-tests-integration.md) |
+| 3 | LLM-as-judge | [exercice3-llm-as-judge.md](module5/exercice3-llm-as-judge.md) |
+| 4 | Docker | [exercice4-docker.md](module5/exercice4-docker.md) |
+| 5 | Monitoring & KPIs | [exercice5-monitoring-kpis.md](module5/exercice5-monitoring-kpis.md) |
+| 6 | Atelier d'amélioration | [exercice6-atelier-amelioration.md](module5/exercice6-atelier-amelioration.md) |
+
+Atelier : [`exercices/module5/atelier/`](module5/atelier/) (diagnostic, priorisation, bilan, CHANGELOG)
+
+## Module 6 — Optimisation & Caching
+
+| # | Exercice | Fichier |
+|---|---|---|
+| 1 | Langfuse (observabilité LLM) | [m6e1_langfuse.md](module6/m6e1_langfuse.md) |
+| 2 | Prompt caching | [m6e2_prompt_caching.md](module6/m6e2_prompt_caching.md) |
+
+Code source : [`exercices/module6/cascade/`](module6/cascade/), [`exercices/module6/reranking/`](module6/reranking/), [`exercices/module6/prompt_caching/`](module6/prompt_caching/)
